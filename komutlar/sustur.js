@@ -1,53 +1,49 @@
-const Discord = require('discord.js');
-exports.run = (client, message, args) => {
+const Discord = require("discord.js");
+const ms = require("ms");
 
-  if (!message.guild) {
-  const ozelmesajuyari = new Discord.RichEmbed()
-  .setColor(0xFF0000)
-  .setTimestamp()
-  .setAuthor(message.author.username, message.author.avatarURL)
-  .addField(':warning: **Uyarı** :warning:', '`sustur` **adlı komutu özel mesajlarda kullanamazsın.**')
-  return message.author.sendEmbed(ozelmesajuyari); }
-  let guild = message.guild
-  let reason = args.slice(1).join(' ');
-  let user = message.mentions.users.first();
-  let modlog = guild.channels.find('name', 'ceza-takip');
-  let muteRole = client.guilds.get(message.guild.id).roles.find('name', 'Muted');
-  if (!modlog) return message.reply('`ceza-takip` **kanalını bulamıyorum.**').catch(console.error);
-  if (!muteRole) return message.reply('`Muted` **adlı bir rol bulamıyorum.**').catch(console.error);
-  if (reason.length < 1) return message.reply(' **Susturma sebebini Yazmadın!** ').catch(console.error);
-  if (message.mentions.users.size < 1) return message.reply(' **Kimi susturacağını Belirtmedin!** ').catch(console.error);
-  const embed = new Discord.RichEmbed()
-    .setColor(0x00AE86)
-    .setTimestamp()
-    .addField('Eylem:', 'Susturma :bangbang: ')
-    .addField('Susturulan Kullanıcı:', `${user.username}#${user.discriminator} (${user.id})`)
-    .addField('Susturan Yetkili:', `${message.author.username}#${message.author.discriminator}`)
-    .addField('Susturma Sebebi', reason);
+module.exports.run = async (bot, message, args) => {
 
-  if (!message.guild.member(client.user).hasPermission('MANAGE_ROLES_OR_PERMISSIONS')) return message.reply('Gerekli izinlere sahip değilim.').catch(console.error);
+  //!mute @user 1s/m/h/d
 
-  if (message.guild.member(user).roles.has(muteRole.id)) {
-    message.guild.member(user).removeRole(muteRole).then(() => {
-      guild.channels.get(modlog.id).sendEmbed(embed).catch(console.error);
-    });
-  } else {
-    message.guild.member(user).addRole(muteRole).then(() => {
-      guild.channels.get(modlog.id).sendEmbed(embed).catch(console.error);
-    });
+  let tomute = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[0]));
+  if(!tomute) return message.channel.send("Please tag user to mute!");
+  if(tomute.hasPermission("MANAGE_MESSAGES")) return message.channel.send("Sorry, you don't have permissions to use this!");
+  if (tomute.id === message.author.id) return message.channel.send("You cannot mute yourself!");
+  let muterole = message.guild.roles.find(`name`, "Odar Mute");
+
+  if(!muterole){
+    try{
+      muterole = await message.guild.createRole({
+        name: "Odar Mute",
+        color: "#000000",
+        permissions:[]
+      })
+      message.guild.channels.forEach(async (channel, id) => {
+        await channel.overwritePermissions(muterole, {
+          SEND_MESSAGES: false,
+          ADD_REACTIONS: false
+        });
+      });
+    }catch(e){
+      console.log(e.stack);
+    }
   }
 
-};
+  let mutetime = args[1];
+  if(!mutetime) return message.channel.send("You didn't specify a time!");
 
-exports.conf = {
-  enabled: true,
-  guildOnly: true,
-  aliases: [],
-  permLevel: 2
-};
+  await(tomute.addRole(muterole.id));
+  message.reply(`<@${tomute.id}> has been muted for ${ms(ms(mutetime))}`);
 
-exports.help = {
-  name: 'sustur',
-  description: 'İstediğiniz kişiyi  susturur.',
-  usage: 'sustur [kullanıcı] [sebep]'
-};
+  setTimeout(function(){
+    tomute.removeRole(muterole.id);
+    message.channel.send(`<@${tomute.id}> has been unmuted!`);
+  }, ms(mutetime));
+
+  message.delete();
+
+}
+
+module.exports.help = {
+  name: "mute"
+}
