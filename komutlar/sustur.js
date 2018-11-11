@@ -1,53 +1,41 @@
-const Discord = require('discord.js');
-exports.run = (client, message, args) => {
+'use strict';
 
-  if (!message.guild) {
-  const ozelmesajuyari = new Discord.RichEmbed()
-  .setColor(0xFF0000)
-  .setTimestamp()
-  .setAuthor(message.author.username, message.author.avatarURL)
-  .addField(':warning: **Uyarı** :warning:', '`sustur` **adlı komutu özel mesajlarda kullanamazsın.**')
-  return message.author.sendEmbed(ozelmesajuyari); }
-  let guild = message.guild
-  let reason = args.slice(1).join(' ');
-  let user = message.mentions.users.first();
-  let modlog = guild.channels.find('name', 'mod-log');
-  let muteRole = client.guilds.get(message.guild.id).roles.find('name', 'Muted');
-  if (!modlog) return message.reply('`mod-log` **kanalını bulamıyorum.**').catch(console.error);
-  if (!muteRole) return message.reply('`Muted` **adlı bir rol bulamıyorum.**').catch(console.error);
-  if (reason.length < 1) return message.reply(' **Susturma sebebini Yazmadın!** ').catch(console.error);
-  if (message.mentions.users.size < 1) return message.reply(' **Kimi susturacağını Belirtmedin!** ').catch(console.error);
-  const embed = new Discord.RichEmbed()
-    .setColor(0x00AE86)
-    .setTimestamp()
-    .addField('Eylem:', 'Susturma :bangbang: ')
-    .addField('Susturulan Kullanıcı:', `${user.username}#${user.discriminator} (${user.id})`)
-    .addField('Susturan Yetkili:', `${message.author.username}#${message.author.discriminator}`)
-    .addField('Susturma Sebebi', reason);
-
-  if (!message.guild.member(client.user).hasPermission('MANAGE_ROLES_OR_PERMISSIONS')) return message.reply('Gerekli izinlere sahip değilim.').catch(console.error);
-
-  if (message.guild.member(user).roles.has(muteRole.id)) {
-    message.guild.member(user).removeRole(muteRole).then(() => {
-      guild.channels.get(modlog.id).sendEmbed(embed).catch(console.error);
-    });
-  } else {
-    message.guild.member(user).addRole(muteRole).then(() => {
-      guild.channels.get(modlog.id).sendEmbed(embed).catch(console.error);
-    });
+const handleMute = async (message, config, matches, log) => {
+  if (message.member.voiceChannel) {
+    const vc = message.member.voiceChannel;
+    if (matches.contains('qm')) {
+      // mute and react
+      // eslint-disable-next-line no-param-reassign
+      config.muteds[vc.id] = vc.members.map((member) => {
+        if (!member.roles.get(config.opRole)) {
+          return member.id;
+        }
+        return undefined;
+      }).filter(item => typeof item !== 'undefined');
+      await vc.overwritePermissions(config.opRole, { SPEAK: true });
+      await vc.overwritePermissions(vc.guild.id, { SPEAK: false });
+      await Promise.all(vc.members.map((member) => {
+        if (!member.roles.get(config.opRole)) {
+          return member.setMute(true, `QuickMuted by ${message.author.tag} (${message.author.id})`);
+        }
+        return undefined;
+      }).filter(p => typeof p !== 'undefined'));
+      log(`Muted members of ${vc.name} by ${message.author}`);
+    } else if (config.muteds[vc.id]) {
+      const vcMuteds = config.muteds[vc.id];
+      await vc.overwritePermissions(vc.guild.id, { SPEAK: true });
+      await Promise.all(vcMuteds.map((id) => {
+        const member = config.guild.members.get(id);
+        if (member) {
+          return member.setMute(false, `Unmuted by ${message.author.tag} (${message.author.id})`);
+        }
+        return undefined;
+      }).filter(p => typeof p !== 'undefined'));
+      config.muteds[vc.id] = undefined; // eslint-disable-line no-param-reassign
+      log(`Unuted members of ${vc.name} by ${message.author}`);
+    }
+    message.delete();
   }
-
 };
 
-exports.conf = {
-  enabled: true,
-  guildOnly: true,
-  aliases: [],
-  permLevel: 2
-};
-
-exports.help = {
-  name: 'sustur',
-  description: 'İstediğiniz kişiyi  susturur.',
-  usage: 'sustur [kullanıcı] [sebep]'
-};
+module.exports = { handleMute };
