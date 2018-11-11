@@ -1,41 +1,102 @@
-'use strict';
+const Discord = require('discord.js');
+const ms = require('ms');
+const sql = require('mysql');
 
-const handleMute = async (message, config, matches, log) => {
-  if (message.member.voiceChannel) {
-    const vc = message.member.voiceChannel;
-    if (matches.contains('qm')) {
-      // mute and react
-      // eslint-disable-next-line no-param-reassign
-      config.muteds[vc.id] = vc.members.map((member) => {
-        if (!member.roles.get(config.opRole)) {
-          return member.id;
-        }
-        return undefined;
-      }).filter(item => typeof item !== 'undefined');
-      await vc.overwritePermissions(config.opRole, { SPEAK: true });
-      await vc.overwritePermissions(vc.guild.id, { SPEAK: false });
-      await Promise.all(vc.members.map((member) => {
-        if (!member.roles.get(config.opRole)) {
-          return member.setMute(true, `QuickMuted by ${message.author.tag} (${message.author.id})`);
-        }
-        return undefined;
-      }).filter(p => typeof p !== 'undefined'));
-      log(`Muted members of ${vc.name} by ${message.author}`);
-    } else if (config.muteds[vc.id]) {
-      const vcMuteds = config.muteds[vc.id];
-      await vc.overwritePermissions(vc.guild.id, { SPEAK: true });
-      await Promise.all(vcMuteds.map((id) => {
-        const member = config.guild.members.get(id);
-        if (member) {
-          return member.setMute(false, `Unmuted by ${message.author.tag} (${message.author.id})`);
-        }
-        return undefined;
-      }).filter(p => typeof p !== 'undefined'));
-      config.muteds[vc.id] = undefined; // eslint-disable-line no-param-reassign
-      log(`Unuted members of ${vc.name} by ${message.author}`);
+const knexDB = require('knex')({
+    client: 'mysql',
+    connection: {
+        host: 'localhost',
+        user: 'admin',
+        password: '1234561asd',
+        database: 'arsbot'
+    },
+    pool: {min: 0, max: 6}
+});
+
+exports.run = (client, message) => {
+    if (!message.guild.member(message.author).hasPermission('MUTE_MEMBERS')) {
+        message.channel.send(':lock: **I** need `MANAGE_ROLES` Permissions to execute `mute`');
+        return;
     }
-    message.delete();
-  }
-};
 
-module.exports = { handleMute };
+    if (!message.guild.member(client.user).hasPermission('MANAGE_ROLES')) {
+        return message.reply(':lock: **I** need `MANAGE_ROLES` Permissions to execute `mute`').catch(e => logger.error(e));
+    }
+    let reason = message.content.split(' ').slice(3).join(' ');
+    let time = message.content.split(' ')[2];
+    let guild = message.guild;
+  // Let adminRole = guild.roles.find("name", "TOA");
+    let member = message.guild.member;
+    let modlog = message.guild.channels.find('name', 'mod-log');
+    let user = message.mentions.users.first();
+    let muteRole = client.guilds.get(message.guild.id).roles.find('name', 'muted');
+    if (!modlog) {
+        return message.reply('I need a text channel named `mod-log` to print my ban/kick logs in, please create one');
+    }
+
+    if (!muteRole) {
+        return message.reply('`Please create a role called "muted"`');
+    }
+
+    if (message.mentions.users.size < 1) {
+        return message.reply('You need to mention someone to Mute him!.');
+    }
+    if (message.author.id === user.id) {
+        return message.reply('You cant punish yourself :wink:');
+    }
+    if (!time) {
+        return message.reply('specify the time for the mute!**Usage:**`~mute [@mention] [1m] [example]`');
+    }
+    if (!time.match(/[1-60][s,m,h,d,w]/g)) {
+        return message.reply('I need a valid time ! look at the Usage! right here: **Usage:**`~mute [@mention] [1m] [example]`');
+    }
+    if (!reason) {
+        return message.reply('You must give me a reason for Mute **Usage:**`~mute [@mention] [15m] [example]`');
+    }
+    if (reason.time < 1) {
+        return message.reply('TIME?').then(message => message.delete(2000));
+    }
+    if (reason.length < 1) {
+        return message.reply('You must give me a reason for Mute');
+    }
+    message.guild.member(user).addRole(muteRole).catch(e => logger.error(e));
+
+    setTimeout(() => {
+        message.guild.member(user).removeRole(muteRole).catch(e => logger.error(e));
+    }, ms(time));
+    message.guild.channels.filter(textchannel => textchannel.type === 'text').forEach(cnl => {
+        cnl.overwritePermissions(muteRole, {
+            SEND_MESSAGES: false
+        });
+    });
+
+    const embed = new Discord.RichEmbed()
+.setColor(16745560)
+.setTimestamp()
+.addField('Mute', `**Muted:**${user.username}#${user.discriminator}\n**Moderator:** ${message.author.username}\n**Duration:** ${ms(ms(time), {long: true})}\n**Reason:** ${reason}`);
+    modlog.send({embed})
+  .catch(e => logger.error(e));
+
+    knexDB.from('bans').where('guildid', message.guild.id).andWhere('userid', user.id).then(count => {
+        if (count.length > 0) {
+            knexDB.update({
+                mutecount: parseInt(count[0].mutecount, 10) + 1
+            }).into('bans').where('guildid', message.guild.id).andWhere('userid', user.id).then(() => {
+
+            })
+            .catch(e => logger.error(e));
+        } else {
+            knexDB.insert({
+                userid: user.id,
+                guildid: message.guild.id,
+                mutecount: 1
+            }).into('bans').where('guildid', message.guild.id).andWhere('userid', user.id).then(() => {
+
+            })
+              .catch(e => logger.error(e));
+        }
+    });
+};
+module.exports.help = {
+    name: 'mute'
+};
