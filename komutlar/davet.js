@@ -1,6 +1,4 @@
 const Discord = require('discord.js');
-const client = new Discord.Client();
-
 module.exports = Cmds.addCommand({
     cmds: [";autoroles"],
 
@@ -29,9 +27,3 @@ module.exports = Cmds.addCommand({
         Util.sendEmbed(channel, "AutoRoles", null, Util.makeEmbedFooter(speaker), null, colGreen, sendEmbedFields);
     }
 });
-
-exports.help = {
-  name: 'davet',
-  description: 'Botun davet linkini gönderir.',
-  usage: 'davet'
-};
