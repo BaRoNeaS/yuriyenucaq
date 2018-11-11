@@ -1,28 +1,34 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-exports.run = (client, message) => {
-  if (message.channel.type !== 'dm') {
-    const ozelmesajkontrol = new Discord.RichEmbed()
-    .setColor(0x00AE86)
-    .setTimestamp()
-    .setAuthor(message.author.username, message.author.avatarURL)
-    .setDescription('Özel mesajlarını kontrol et. :postbox:');
-    message.channel.sendEmbed(ozelmesajkontrol) }
-	const pingozel = new Discord.RichEmbed()
-    .setColor(0x00AE86)
-    .setTimestamp()
-    .setAuthor(message.author.username, message.author.avatarURL)
-    .setDescription('İşte Davet Linkim: http://bit.ly/walkybot');
-    return message.author.sendEmbed(pingozel)
-};
+module.exports = Cmds.addCommand({
+    cmds: [";autoroles"],
 
-exports.conf = {
-  enabled: true,
-  guildOnly: false,
-  aliases: ['botu ekle', 'botu davet et', 'botuekle', 'invite'],
-  permLevel: 0
-};
+    requires: {
+        guild: true,
+        loud: false
+    },
+
+    desc: "Get all autoroles (roles which users are allowed to assign to themselves)",
+
+    args: "",
+
+    example: "",
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    func: (cmd, args, msgObj, speaker, channel, guild) => {
+        var sendEmbedFields = [];
+        var guildAutoRoles = Data.guildGet(guild, Data.autoRoles);
+
+        for (var name in guildAutoRoles) {
+            if (!guildAutoRoles.hasOwnProperty(name)) continue;
+            sendEmbedFields.push({name: name, value: "Role: " + guildAutoRoles[name], inline: false});
+        }
+
+        Util.sendEmbed(channel, "AutoRoles", null, Util.makeEmbedFooter(speaker), null, colGreen, sendEmbedFields);
+    }
+});
 
 exports.help = {
   name: 'davet',
