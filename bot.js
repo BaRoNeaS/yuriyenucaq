@@ -112,7 +112,7 @@ client.on("message", msg => {
         }
     });
 client.on('message', msg => {
-  if (msg.content.toLowerCase() === '@507838247838154753 nasılsın') {
+  if (msg.content.toLowerCase() === '<GyK Bot>#3655 nasılsın') {
     msg.reply('Teşekkürler Sen Nasılsın');
   }
 });
