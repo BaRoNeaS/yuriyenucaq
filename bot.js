@@ -82,12 +82,6 @@ client.on('message', msg => {
     msg.reply('Aleyküm selam');
   }
 	
-  });
-};	
-client.on('message', msg => {
-   if (msg.content.toLowerCase() === '@507838247838154753 nasılsın') {
-     msg.reply('İyiyim Teşekür Ederim Sen Nasılsın?');
-  }
 });
 client.on("message", msg => {
    const link = [".com", ".net", ".xyz", ".tk", ".pw", ".io", ".me", ".gg", "www.", "https", "http", ".gl", ".org", ".com.tr", ".biz", "net", ".rf.gd", ".az", ".party"];
@@ -118,8 +112,8 @@ client.on("message", msg => {
         }
     });
 client.on('message', msg => {
-  if (msg.content.toLowerCase() === 'dc davet linki') {
-    msg.reply('https://discord.gg/G94PW9T');
+  if (msg.content.toLowerCase() === '@507838247838154753 nasılsın') {
+    msg.reply('Teşekkürler Sen Nasılsın');
   }
 });
 
