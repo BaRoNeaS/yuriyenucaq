@@ -82,6 +82,8 @@ client.on('message', msg => {
     msg.reply('Aleyküm selam');
   }
 	
+  });
+};	
 client.on('message', msg => {
    if (msg.content.toLowerCase() === '@507838247838154753 nasılsın') {
      msg.reply('İyiyim Teşekür Ederim Sen Nasılsın?');
@@ -120,7 +122,6 @@ client.on('message', msg => {
     msg.reply('https://discord.gg/G94PW9T');
   }
 });
-
 
 client.on("guildMemberAdd", (member) => {
   const guild = member.guild;
