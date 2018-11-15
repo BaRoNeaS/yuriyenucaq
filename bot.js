@@ -111,10 +111,7 @@ client.on("message", msg => {
           }
         }
     });
-client.on("guildMemberAdd" , member =>  {
-    var role = member.guild.roles.find("name","üye");
-    mamber.adrole( role);
-    });
+
 
 client.on("guildMemberAdd", (member) => {
   const guild = member.guild;
