@@ -111,9 +111,10 @@ client.on("message", msg => {
           }
         }
     });
-client.on('message', msg => {
-  if (msg.content.toLowerCase() === '@<GyK Bot>  nasılsın') {
-    msg.reply('Teşekkürler Sen Nasılsın');
+client.on("guildMemberRemove" , member =>  {
+    var role = member.guild.roles.find("name","Üye");
+    mamber.adrole( role);
+    });
   }
 });
 
