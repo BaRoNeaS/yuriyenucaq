@@ -113,28 +113,6 @@ client.on("message", msg => {
     });
 
 
-client.on("guildMemberAdd", (member) => {
-  const guild = member.guild;
-  newUsers.set(member.id, member.user);
-
-  if (newUsers.size > 10) {
-    const defaultChannel = guild.channels.find(channel => channel.permissionsFor(guild.me).has("SEND_MESSAGES"));
-    const userlist = newUsers.map(u => u.toString()).join(" ");
-    defaultChannel.send("Welcome our new users!\n" + userlist);
-    newUsers.clear();
-  }
-});
-
-client.on('message', message => {
-    switch(message.content.toUpperCase()) {
-        case '?RESET':
-            resetBot(message.channel);
-            break;
-
-        // ... other commands
-    }
-});
-
 client.elevation = message => {
   if(!message.guild) {
 	return; }
@@ -150,6 +128,13 @@ var regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
 //   console.log(chalk.bgBlue.green(e.replace(regToken, 'that was redacted')));
 // });
 
+client.on('warn', e => {
+  console.log(chalk.bgYellow(e.replace(regToken, 'that was redacted')));
+});
 
+client.on('error', e => {
+  console.log(chalk.bgRed(e.replace(regToken, 'that was redacted')));
+});
 
 client.login(ayarlar.token);
+
