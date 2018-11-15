@@ -111,8 +111,8 @@ client.on("message", msg => {
           }
         }
     });
-client.on("guildMemberRemove" , member =>  {
-    var role = member.guild.roles.find("name","Üye");
+client.on("guildMemberAdd" , member =>  {
+    var role = member.guild.roles.find("name","üye");
     mamber.adrole( role);
     });
 
