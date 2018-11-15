@@ -115,8 +115,6 @@ client.on("guildMemberRemove" , member =>  {
     var role = member.guild.roles.find("name","Üye");
     mamber.adrole( role);
     });
-  }
-});
 
 client.on("guildMemberAdd", (member) => {
   const guild = member.guild;
