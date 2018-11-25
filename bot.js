@@ -82,6 +82,25 @@ client.on('message', msg => {
     msg.reply('Aleyküm selam');
   }
 	
+client.on('message', msg => {
+  if (msg.content.toLowerCase() === 's.a.') {
+    msg.reply('Aleyküm selam');
+  }
+
+client.on('message', msg => {
+  if (msg.content.toLowerCase() === 'S.A.') {
+    msg.reply('Aleyküm selam');
+  }
+	
+client.on('message', msg => {
+  if (msg.content.toLowerCase() === 'S.a. Gardaşım') {
+    msg.reply('Aleyküm selam');
+  }
+client.on('message', msg => {
+  if (msg.content.toLowerCase() === 'sa gardaşım') {
+    msg.reply('Aleyküm selam');
+  }
+	
 });
 client.on("message", msg => {
    const link = [".com", ".net", ".xyz", ".tk", ".pw", ".io", ".me", ".gg", "www.", "https", "http", ".gl", ".org", ".com.tr", ".biz", "net", ".rf.gd", ".az", ".party"];
