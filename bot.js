@@ -81,11 +81,6 @@ client.on('message', msg => {
   if (msg.content.toLowerCase() === 'sa') {
     msg.reply('Aleyküm selam');
   }
-	
-client.on('message', msg => {
-  if (msg.content.toLowerCase() === 's.a.') {
-    msg.reply('Aleyküm selam');
-  }
 
 client.on('message', msg => {
   if (msg.content.toLowerCase() === 'S.A.') {
@@ -96,6 +91,7 @@ client.on('message', msg => {
   if (msg.content.toLowerCase() === 'S.a. Gardaşım') {
     msg.reply('Aleyküm selam Abiciğim');
   }
+	
 client.on('message', msg => {
   if (msg.content.toLowerCase() === 'sa gardaşımlarım') {
     msg.reply('Aleyküm selam Abi');
