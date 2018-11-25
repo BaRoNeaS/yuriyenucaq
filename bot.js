@@ -82,20 +82,7 @@ client.on('message', msg => {
     msg.reply('Aleyküm selam');
   }
 
-client.on('message', msg => {
-  if (msg.content.toLowerCase() === 'S.A.') {
-    msg.reply('Aleyküm selam');
-  }
-	
-client.on('message', msg => {
-  if (msg.content.toLowerCase() === 'S.a. Gardaşım') {
-    msg.reply('Aleyküm selam Abiciğim');
-  }
-	
-client.on('message', msg => {
-  if (msg.content.toLowerCase() === 'sa gardaşımlarım') {
-    msg.reply('Aleyküm selam Abi');
-  }
+
 	
 });
 client.on("message", msg => {
@@ -112,20 +99,7 @@ client.on("message", msg => {
           }
         }
     });
-client.on("message", msg => {
-   const link = [".com", "amk", ".xyz", ".tk", ".pw", ".io", ".me", ".gg", "www.", "https", "http", ".gl", ".org", ".com.tr", ".biz", "net", ".rf.gd", ".az", ".party"];
-        if (link.some(word => msg.content.includes(word))) {
-          try {
-             if (!msg.member.hasPermission("BAN_MEMBERS")) {
-                  msg.delete();
 
-                  return msg.reply('Reklam yapmamalısın! :warning:').then(msg => msg.delete(3000));
-             }              
-          } catch(err) {
-            console.log(err);
-          }
-        }
-    });
 
 
 client.elevation = message => {
