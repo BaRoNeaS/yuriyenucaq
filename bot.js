@@ -94,11 +94,11 @@ client.on('message', msg => {
 	
 client.on('message', msg => {
   if (msg.content.toLowerCase() === 'S.a. Gardaşım') {
-    msg.reply('Aleyküm selam');
+    msg.reply('Aleyküm selam Abiciğim');
   }
 client.on('message', msg => {
-  if (msg.content.toLowerCase() === 'sa gardaşım') {
-    msg.reply('Aleyküm selam');
+  if (msg.content.toLowerCase() === 'sa gardaşımlarım') {
+    msg.reply('Aleyküm selam Abi');
   }
 	
 });
